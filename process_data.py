@@ -1,67 +1,81 @@
+
 import json
-import pandas as pd
 from pathlib import Path
 
-## FIND RECENT COLLECTION
-data_folder = Path("data")
+import pandas as pd
 
-files = list(data_folder.glob("vehicle_collection_*.json"))
 
-if not files: 
-    print("No collection files found")
-    exit()
+# FILE PATHS
+DATA_DIR = Path(__file__).parent / "data"
+OUTPUT_DIR = DATA_DIR / "cleaned"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-latest_file = max(files, key=lambda file: file.stat().st_mtime)
 
-print(f"Reading: {latest_file}")
+def process_file(input_file):
+    """Convert one raw vehicle collection into a separate cleaned CSV."""
 
-## LOAD JSON
-with open(latest_file, "r") as file:
-    snapshots = json.load(file)
+    with open(input_file, "r", encoding="utf-8") as file:
+        snapshots = json.load(file)
 
-## CONVERT TO ROWS
-rows = []
+    rows = []
 
-for snapshot in snapshots:
+    for snapshot in snapshots:
+        timestamp = snapshot.get("timestamp")
+        data = snapshot.get("data", {})
 
-    timestamp = snapshot["timestamp"]
-    vehicles = snapshot["data"].get("features", [])
+        for feature in data.get("features", []):
+            properties = feature.get("properties", {})
+            geometry = feature.get("geometry", {})
 
-    for vehicle in vehicles:
-        properties = vehicle.get("properties", {})
-        coordinates = vehicle.get("geometry", {}).get("coordinates", [])
+            coordinates = geometry.get("coordinates", [None, None])
 
-        longitude = coordinates[0] if len(coordinates) > 0 else None
-        latitude = coordinates[1] if len(coordinates) > 1 else None
+            longitude = coordinates[0] if len(coordinates) > 0 else None
+            latitude = coordinates[1] if len(coordinates) > 1 else None
 
-        row = {
-            "timestamp": timestamp,
-            "vehicle_id": properties.get("vehicle_id"),
-            "trip_id": properties.get("gtfs_trip_id"),
-            "route": properties.get("gtfs_route_short_name"),
-            "mode": properties.get("route_type"),
-            "delay_seconds": properties.get("delay"),
-            "status": properties.get("state_position"),
-            "bearing": properties.get("bearing"),
-            "longitude": longitude,
-            "latitude": latitude
-        }
+            rows.append({
+                "timestamp": timestamp,
+                "vehicle_id": properties.get("vehicle_id"),
+                "trip_id": properties.get("gtfs_trip_id"),
+                "route": properties.get("gtfs_route_short_name"),
+                "mode": properties.get("route_type"),
+                "delay_seconds": properties.get("delay"),
+                "status": properties.get("state_position"),
+                "bearing": properties.get("bearing"),
+                "longitude": longitude,
+                "latitude": latitude,
+            })
 
-        rows.append(row)
+    columns = [
+        "timestamp", "vehicle_id", "trip_id", "route", "mode",
+        "delay_seconds", "status", "bearing", "longitude", "latitude"
+    ]
 
-## CREATE DATAFRAME
-df = pd.DataFrame(rows)
+    df = pd.DataFrame(rows, columns=columns)
 
-## SAVE CLEANED DATA
-output_file = data_folder / "vehicle_data_clean.csv"
+    # Create a separate CSV using the raw session's filename
+    session_name = input_file.stem.replace("vehicle_collection_", "")
+    output_file = OUTPUT_DIR / f"vehicle_data_{session_name}.csv"
 
-df.to_csv(output_file, index=False)
+    df.to_csv(output_file, index=False)
 
-## PRINT SUMMARY
-print(f"Rows: {len(df)}")
-print(f"Columns: {len(df.columns)}")
-print(f"Saved to: {output_file}")
+    print(f"Processed: {input_file.name}")
+    print(f"Rows: {len(df):,}")
+    print(f"Saved: {output_file}")
 
-print()
-print("First five rows:")
-print(df.head())
+
+def main():
+    # Process each raw collection separately
+    raw_files = sorted(DATA_DIR.glob("vehicle_collection_*.json"))
+
+    if not raw_files:
+        print("No raw collection files found.")
+        return
+
+    for input_file in raw_files:
+        process_file(input_file)
+
+    print(f"\nFinished processing {len(raw_files)} collection file(s).")
+
+
+if __name__ == "__main__":
+    main()

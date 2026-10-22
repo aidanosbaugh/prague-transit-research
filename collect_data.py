@@ -2,7 +2,9 @@ import os
 import json
 import time
 from datetime import datetime
+from datetime import timedelta
 import requests
+from zoneinfo import ZoneInfo
 from dotenv import load_dotenv
 
 
@@ -22,36 +24,63 @@ headers = {
 collection_length = 20 * 180
 interval = 20 ##<-seconds
 
-start_time = time.time()
+## START/TIMEZONE SETTINGS
+tz = ZoneInfo("Europe/Prague")
+start_time = datetime.now(tz)
+now = datetime.now(tz)
+##stop_at = now.replace(hour=9, minute=0, second=0, microsecond=0)
+stop_at = start_time + timedelta(minutes=2)
+
+# ONLY COLLECT B/W 7-9
+##if start_time.hour < 7 or start_time.hour > 9:
+    ##print("Outside collection window (07:00-09:00 Prague time).")
+    ##raise SystemExit(0)
+
 snapshots = []
 
-while time.time() - start_time < collection_length:
+try:
+    while datetime.now(tz) < stop_at:
 
-    timestamp = datetime.now().isoformat()
+        timestamp = datetime.now(tz).isoformat()
 
-    response = requests.get(url, headers=headers)
+        try:
+            response = requests.get(
+                url,
+                headers=headers,
+                timeout=15
+            )
+            response.raise_for_status()
+            data = response.json()
 
-    if response.status_code == 200:
-        data = response.json()
+            snapshot = {
+                "timestamp": timestamp,
+                "data": data
+            }
+            snapshots.append(snapshot)
 
-        snapshot = {
-            "timestamp": timestamp,
-            "data": data
-        }
+            vehicle_count = len(data.get("features", []))
 
-        snapshots.append(snapshot)
+            print(
+                f"{timestamp} | "
+                f"Vehicles collected: {vehicle_count}"
+            )
 
-        vehicle_count = len(data.get("features", []))
+        except (requests.RequestException, ValueError) as error:
+            print(f"{timestamp} | API/data error: {error}")
 
-        print(
-            f"{timestamp} | "
-            f"Vehicles collected: {vehicle_count}"
-        )
-    else:
-        print(
-            f"Error: {response.status_code}"
-        )
-    time.sleep(interval)
+        # Sleep for 20 seconds, or until 09:00 if sooner
+        remaining = (
+            stop_at - datetime.now(tz)
+        ).total_seconds()
+
+        if remaining > 0:
+            time.sleep(min(interval, remaining))
+
+except KeyboardInterrupt:
+    print("Collection interrupted manually.")
+
+finally:
+    end_time = datetime.now(tz)
 
 ## SAVE DATA AFTER COLLECTION
 
