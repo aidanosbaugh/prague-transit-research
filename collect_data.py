@@ -21,24 +21,26 @@ headers = {
 }
 
 ## COLLECTION SETTINGS
-collection_length = 20 * 180
-interval = 20 ##<-seconds
+collection_length = timedelta(hours=2)
+interval = 20
 
 ## START/TIMEZONE SETTINGS
 tz = ZoneInfo("Europe/Prague")
 start_time = datetime.now(tz)
 now = datetime.now(tz)
-##stop_at = now.replace(hour=9, minute=0, second=0, microsecond=0)
-stop_at = start_time + timedelta(minutes=2)
+stop_at = now.replace(hour=11, minute=0, second=0, microsecond=0)
+
 
 # ONLY COLLECT B/W 7-9
-##if start_time.hour < 7 or start_time.hour > 9:
-    ##print("Outside collection window (07:00-09:00 Prague time).")
-    ##raise SystemExit(0)
+if start_time.hour < 7 or start_time > stop_at:
+    print("Outside collection window (07:00-09:00 Prague time).")
+    raise SystemExit(0)
 
 snapshots = []
 
 try:
+    next_collection = time.monotonic()
+
     while datetime.now(tz) < stop_at:
 
         timestamp = datetime.now(tz).isoformat()
@@ -69,12 +71,14 @@ try:
             print(f"{timestamp} | API/data error: {error}")
 
         # Sleep for 20 seconds, or until 09:00 if sooner
+        next_collection += interval
+        sleep_time = next_collection - time.monotonic()
         remaining = (
             stop_at - datetime.now(tz)
         ).total_seconds()
 
-        if remaining > 0:
-            time.sleep(min(interval, remaining))
+        if remaining > 0 and sleep_time > 0:
+            time.sleep(min(sleep_time, remaining))
 
 except KeyboardInterrupt:
     print("Collection interrupted manually.")
