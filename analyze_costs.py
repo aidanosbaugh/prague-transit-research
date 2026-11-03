@@ -17,15 +17,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# ---------------------------------------------------------------- PATHS
+## PATHS
 DATA_DIR = Path(__file__).parent / "data" / "trams"
 OUT_DIR = DATA_DIR / "results"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 ROUTES = ["9", "17", "22"]
 
-# ------------------------------------------------- COST PARAMETERS
-# Set these from sourced values before reporting any cost figure.
-VOT_CZK_PER_HOUR = None      # value of time (CZK/hour), e.g. from Czech appraisal guidance
+## COST PARAMETERS
+## Set these from sourced values before reporting any cost figure.
+VOT_CZK_PER_HOUR = 250      # value of time (CZK/hour), e.g. from Czech appraisal guidance
 VOR_MULTIPLIER = 1.4         # reliability premium implied by Dutch values in van Oort (2016)
 TRIPS_PER_DAY = 2            # assumption for a representative commuter
 DAYS_PER_YEAR = 220          # assumption for a representative commuter
@@ -33,7 +33,7 @@ DAYS_PER_YEAR = 220          # assumption for a representative commuter
 sns.set_theme(style="whitegrid", context="paper")
 
 
-# ----------------------------------------------------------- LOADING
+## LOADING
 def load_data():
     files = sorted(DATA_DIR.glob("tram_data_*.csv"))
     if not files:
@@ -54,7 +54,7 @@ def load_data():
     return df
 
 
-# ------------------------------------------------------- STATISTICS
+## STATISTICS
 def describe(x):
     x = pd.Series(x).dropna()
     return pd.Series({
@@ -79,7 +79,7 @@ def summary_by(df, by):
     return df.groupby(by)["delay_min"].apply(describe).unstack().round(3)
 
 
-# ------------------------------------------------------------- COST
+## COST
 def cost_table(df):
     rows = []
     for route, g in list(df.groupby("route")) + [("All", df)]:
@@ -98,7 +98,7 @@ def cost_table(df):
     return pd.DataFrame(rows).round(3)
 
 
-# ------------------------------------------------------------ PLOTS
+## PLOTS
 def make_plots(df):
     # Histogram (1-minute bins), one panel per route
     fig, axes = plt.subplots(1, len(ROUTES), figsize=(12, 4), sharey=True)
@@ -113,7 +113,7 @@ def make_plots(df):
     plt.savefig(OUT_DIR / "fig1_histogram.png", dpi=300)
     plt.close(fig)
 
-    # Boxplot, outliers SHOWN (tails drive the cost)
+    ## Boxplot, outliers SHOWN (tails drive the cost)
     fig, ax = plt.subplots(figsize=(7, 5))
     sns.boxplot(data=df, x="route", y="delay_min", order=ROUTES,
                 color="lightsteelblue", fliersize=2, ax=ax)
@@ -124,7 +124,7 @@ def make_plots(df):
     plt.savefig(OUT_DIR / "fig2_boxplot.png", dpi=300)
     plt.close(fig)
 
-    # ECDF
+    ## ECDF
     fig, ax = plt.subplots(figsize=(7, 5))
     sns.ecdfplot(data=df, x="delay_min", hue="route", hue_order=ROUTES, ax=ax)
     ax.axvline(0, color="black", linestyle="--", linewidth=1)
@@ -135,7 +135,7 @@ def make_plots(df):
     plt.close(fig)
 
 
-# ------------------------------------------------------------- MAIN
+## MAIN
 def main():
     df = load_data()
     print(f"Observations: {len(df):,} | sessions: {df['session'].nunique()}")
