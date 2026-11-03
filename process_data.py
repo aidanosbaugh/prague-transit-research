@@ -6,8 +6,8 @@ import pandas as pd
 
 
 # FILE PATHS
-DATA_DIR = Path(__file__).parent / "data"
-OUTPUT_DIR = DATA_DIR / "cleaned"
+DATA_DIR = Path(__file__).parent / "data/raw"
+OUTPUT_DIR = Path(__file__).parent / "data/cleaned" 
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 

@@ -88,4 +88,34 @@ else:
 
         plt.close(fig)
 
+    print("\nAll graphs processed.")
+
+## GENERAL INDIVIDUAL SUMMARY AFTER THE PLOTING (NUMERICvGRAPHIC)
+
+if not INPUT_FILES:
+    print(f"No CSV files found in {DATA_DIR}")
+else:
+    for INPUT_FILE in INPUT_FILES:
+
+        print(f"\nAnalyzing: {INPUT_FILE.name}")
+
+        ## LOAD DATA
+        df = pd.read_csv(INPUT_FILE)
+
+        ## CLEAN DATA
+        df["route"] = df["route"].astype(str)
+        df["delay_seconds"] = pd.to_numeric(
+            df["delay_seconds"], errors="coerce"
+        )
+        df = df.dropna(subset=["route", "delay_seconds"])
+
+        ## 5 NUMBER SUMMARY
+        median = df.groupby("route")["delay_seconds"].median()
+        mean = df.groupby("route")["delay_seconds"].mean()
+        quant1 = df.groupby("route")["delay_seconds"].quantile(0.25)
+        quant3 = df.groupby("route")["delay_seconds"].quantile(0.75)
+        std = df.groupby("route")["delay_seconds"].std()
+
+        print(f"Med = {median}, Mean = {mean}, Q1 = {quant1}, Q3 = {quant3}, Standard Dev. = {std}")
+
     print("\nAll files processed.")

@@ -1,4 +1,10 @@
-2026-10-23T07:07:35.261184+02:00 | Vehicles collected: 2491
-2026-10-23T07:08:13.031059+02:00 | Vehicles collected: 2482
-2026-10-23T07:08:43.250754+02:00 | Vehicles collected: 2490
-Data Collected
+Starting Prague tram data collection.
+2026-11-03T07:10:13.096465+01:00 | Vehicles collected: 2528
+2026-11-03T07:55:35.256142+01:00 | Vehicles collected: 2175
+2026-11-03T08:21:34.977991+01:00 | Vehicles collected: 2041
+2026-11-03T08:38:44.200556+01:00 | Vehicles collected: 1936
+--------------------------------
+COLLECTION FINISHED
+Snapshots collected: 4
+File saved: data/raw/vehicle_collection_20261103_091122.json
+--------------------------------
