@@ -25,8 +25,8 @@ ROUTES = ["9", "17", "22"]
 
 ## COST PARAMETERS
 ## Set these from sourced values before reporting any cost figure.
-VOT_CZK_PER_HOUR = 250      # value of time (CZK/hour), e.g. from Czech appraisal guidance
-VOR_MULTIPLIER = 1.4         # reliability premium implied by Dutch values in van Oort (2016)
+VOT_CZK_PER_HOUR = 121.1    # value of time (CZK/hour), e.g. from Czech appraisal guidance
+VOR_MULTIPLIER = 0.54         # reliability premium implied by Dutch values in van Oort (2016)
 TRIPS_PER_DAY = 2            # assumption for a representative commuter
 DAYS_PER_YEAR = 220          # assumption for a representative commuter
 
