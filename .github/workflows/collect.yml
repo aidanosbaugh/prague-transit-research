@@ -2,12 +2,44 @@ name: Prague Tram Data Collection
 
 on:
   schedule:
-    - cron: '0 6 * * 1-5'
-
+    - cron: '45 4 * * 1-5'   # 06:45 Prague during summer time (CEST, UTC+2)
+    - cron: '45 5 * * 1-5'   # 06:45 Prague during winter time (CET, UTC+1)
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: tram-collection
+  cancel-in-progress: false
+
 jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - name: Decide whether this trigger is the right one for the season
+        id: check
+        env:
+          EVENT: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
+        run: |
+          OFFSET=$(TZ=Europe/Prague date +%z)
+          echo "Event: $EVENT | Schedule: $SCHEDULE | Prague UTC offset: $OFFSET"
+          RUN=false
+          if [ "$EVENT" != "schedule" ]; then
+            RUN=true
+          elif [ "$SCHEDULE" = "45 4 * * 1-5" ] && [ "$OFFSET" = "+0200" ]; then
+            RUN=true
+          elif [ "$SCHEDULE" = "45 5 * * 1-5" ] && [ "$OFFSET" = "+0100" ]; then
+            RUN=true
+          fi
+          echo "run=$RUN" >> "$GITHUB_OUTPUT"
+
   collect:
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 160
 
@@ -28,7 +60,9 @@ jobs:
       - name: Collect tram data
         env:
           GOLEMIO_API_KEY: ${{ secrets.GOLEMIO_API_KEY }}
-        run: python collect_data.py
+        run: |
+          date -u
+          python -u collect_data.py
 
       - name: Save collected data
         if: always()
