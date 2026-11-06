@@ -8,3 +8,36 @@ COLLECTION FINISHED
 Snapshots collected: 4
 File saved: data/raw/vehicle_collection_20261103_091122.json
 --------------------------------
+Starting Prague tram data collection.
+2026-11-04T07:00:43.759326+01:00 | Vehicles collected: 2442
+2026-11-04T07:32:15.813460+01:00 | Vehicles collected: 2520
+2026-11-04T08:06:39.134293+01:00 | Vehicles collected: 2090
+2026-11-04T08:49:43.150224+01:00 | Vehicles collected: 1769
+--------------------------------
+COLLECTION FINISHED
+Snapshots collected: 4
+File saved: data/raw/vehicle_collection_20261104_093459.json
+--------------------------------
+Starting Prague tram data collection.
+2026-11-05T07:03:08.969206+01:00 | Vehicles collected: 2440
+2026-11-05T07:46:11.927876+01:00 | Vehicles collected: 2259
+2026-11-05T08:25:55.996111+01:00 | Vehicles collected: 1981
+--------------------------------
+COLLECTION FINISHED
+Snapshots collected: 3
+File saved: data/raw/vehicle_collection_20261105_090318.json
+--------------------------------
+Starting Prague tram data collection.
+2026-11-06T07:03:55.234044+01:00 | Vehicles collected: 2436
+2026-11-06T07:45:22.257308+01:00 | Vehicles collected: 2218
+2026-11-06T08:02:36.113195+01:00 | Vehicles collected: 2021
+2026-11-06T08:23:52.901327+01:00 | API/data error: HTTPSConnectionPool(host='api.golemio.cz', port=443): Max retries exceeded with url: /v2/public/vehiclepositions (Caused by NameResolutionError("HTTPSConnection(host='api.golemio.cz', port=443): Failed to resolve 'api.golemio.cz' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-11-06T08:42:32.974460+01:00 | Vehicles collected: 1778
+2026-11-06T08:59:06.779825+01:00 | Vehicles collected: 1581
+2026-11-06T08:59:26.668033+01:00 | Vehicles collected: 1579
+2026-11-06T08:59:46.652165+01:00 | Vehicles collected: 1575
+--------------------------------
+COLLECTION FINISHED
+Snapshots collected: 7
+File saved: data/raw/vehicle_collection_20261106_090000.json
+--------------------------------
